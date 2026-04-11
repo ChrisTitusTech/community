@@ -194,13 +194,38 @@ Create these groups in **Admin → Groups** before enabling integrations (names 
 
 ## Verify & Debug
 
+Run the all-in-one debug script from inside the container:
+
 ```bash
-# Tail Discourse logs for sync activity
+# Copy script into the container's shared volume, then run it
+cp scripts/debug_plugin.sh /var/discourse/shared/standalone/debug_plugin.sh
+cd /var/discourse && ./launcher enter app
+bash /shared/debug_plugin.sh
+```
+
+The script checks:
+1. All plugin files are present on disk
+2. Plugin appears in the Discourse registry
+3. All `community_integrations_*` settings are non-empty
+4. Required groups exist (`Twitch Subscriber`, `GitHub Sponsors`, `YouTube Member`)
+5. Auth providers (Twitch, YouTube) are registered and enabled
+6. Redis is reachable
+7. Sidekiq job classes are loaded
+8. Sidekiq dead/retry queue for plugin job failures
+9. Recent errors in `production.log` for this plugin
+
+```bash
+# Quick one-liners
+
+# Tail logs for sync activity
 sudo /var/discourse/launcher logs app | grep -E "(TwitchChecker|GithubSponsor|YoutubeMember|ERROR)"
 
 # Manually trigger a full re-sync
 sudo /var/discourse/launcher enter app
 rails r "Jobs::SyncCommunityIntegrations.new.execute({})"
+
+# Check a user's connected accounts (replace 1 with user ID)
+rails r "puts UserAssociatedAccount.where(user_id: 1).pluck(:provider_name, :provider_uid)"
 ```
 
 ---
