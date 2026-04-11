@@ -226,5 +226,50 @@ bash <(curl -fsSL https://raw.githubusercontent.com/ChrisTitusTech/community/mai
 
 This installs Docker, configures UFW (ports 22/80/443), adds a 2 GB swapfile, and clones `discourse_docker`. After it completes, copy `deploy/app.yml` to `/var/discourse/containers/app.yml`, fill in the `REPLACE_WITH_*` placeholders, then bootstrap.
 
+---
+
+## Removing Caddy and Running Discourse Standalone
+
+If you previously had Caddy in front of Discourse and want to remove it:
+
+**1. Stop and disable Caddy**
+
+```bash
+sudo systemctl stop caddy
+sudo systemctl disable caddy
+```
+
+**2. Open ports 80 and 443 in UFW**
+
+Caddy was holding these ports. Release them:
+
+```bash
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+```
+
+**3. Update `containers/app.yml`**
+
+Change the `expose` section to:
+
+```yaml
+expose:
+  - "80:80"
+  - "443:443"
+```
+
+The `deploy/app.yml` in this repo already defaults to this. `DISCOURSE_FORCE_HTTPS: true` remains correct and still needed — Discourse's own nginx uses it to issue valid `https://` OAuth callback URLs.
+
+**4. Rebuild**
+
+```bash
+cd /var/discourse
+./launcher rebuild app
+```
+
+Discourse's built-in nginx will obtain a Let's Encrypt certificate automatically on first boot, as long as:
+- Your domain's DNS A record points to this server's IP
+- Port 80 is reachable (Let's Encrypt HTTP-01 challenge)
+- `DISCOURSE_HOSTNAME` matches the domain exactly
 
 ---
