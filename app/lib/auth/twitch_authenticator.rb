@@ -40,12 +40,17 @@ class Auth::TwitchAuthenticator < Auth::ManagedAuthenticator
     persist_token_metadata(result.user, auth_token)
     Jobs.enqueue(:check_twitch_subscriber, user_id: result.user.id)
     result
+  rescue => e
+    Rails.logger.error("TwitchAuthenticator#after_authenticate failed: #{e.class}: #{e.message}")
+    result
   end
 
   def after_create_account(user, auth_token)
     super
     persist_token_metadata(user, auth_token)
     Jobs.enqueue(:check_twitch_subscriber, user_id: user.id)
+  rescue => e
+    Rails.logger.error("TwitchAuthenticator#after_create_account failed: #{e.class}: #{e.message}")
   end
 
   private
