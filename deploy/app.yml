@@ -158,8 +158,9 @@ hooks:
           ## unnecessary and cause Redis to crash on fork() when the kernel
           ## disallows memory overcommit (the default in many Docker hosts).
           ## Disabling saves eliminates the crash entirely with no data loss.
-          - redis-cli CONFIG SET save ""
-          - redis-cli CONFIG SET stop-writes-on-bgsave-error no
+          ## Note: redis-cli CONFIG SET is omitted here because Redis is not
+          ## yet running during bootstrap — config file edits are sufficient.
           - sed -i '/^save /d' /etc/redis/redis.conf
           - grep -qxF 'save ""' /etc/redis/redis.conf || echo 'save ""' >> /etc/redis/redis.conf
           - grep -qxF 'stop-writes-on-bgsave-error no' /etc/redis/redis.conf || echo 'stop-writes-on-bgsave-error no' >> /etc/redis/redis.conf
+
