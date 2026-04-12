@@ -59,3 +59,15 @@ plugins:
     type: integer
     min: 1
     max: 24
+
+  # ── Right sidebar ────────────────────────────────────────────────────────────
+  community_integrations_gamification_leaderboard_id:
+    default: 0
+    type: integer
+    min: 0
+    client: true
+
+  community_integrations_sidebar_category_ids:
+    default: ""
+    type: string
+    client: true

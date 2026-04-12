@@ -37,6 +37,15 @@ en:
       sent to end users.
     community_integrations_youtube_member_group: "Discourse group name for active YouTube channel members"
 
+    # ── Right sidebar ────────────────────────────────────────────────────────
+    community_integrations_gamification_leaderboard_id: >-
+      Gamification leaderboard ID to display in the right sidebar.
+      Set to 0 to hide the leaderboard block.
+      Find the ID in Admin → Plugins → Gamification (shown in the URL when editing a leaderboard).
+    community_integrations_sidebar_category_ids: >-
+      Comma-separated category IDs to display in the right sidebar category list.
+      Leave blank to show all top-level categories.
+
     # ── Sync schedule ─────────────────────────────────────────────────────────
     community_integrations_sync_interval_hours: >
       How often (in hours) to re-verify all linked accounts in the background.

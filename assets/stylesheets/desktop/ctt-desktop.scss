@@ -21,13 +21,82 @@
   border-right: 1px solid var(--ctt-border);
 }
 
-// ── Right Sidebar Blocks — float clearfix ─────────────────────────────────────
-// discourse-right-sidebar-blocks uses float: right / float: left layout.
-// Without clearing, floated children collapse the parent .wrap containers,
-// causing the page to visually repeat. display: flow-root creates a new block
-// formatting context that expands to contain its floated children.
-.wrap:has(.tc-right-sidebar) {
-  display: flow-root;
+// ── Right sidebar layout ──────────────────────────────────────────────────────
+// Float-based layout (intentional — we can't use grid/flex on the core .wrap
+// element because we have no way to add a class to it from a connector).
+// display: flow-root on the parent wrap makes it contain its floated children,
+// which prevents the page from repeating when background-color is set on .wrap.
+
+.tc-right-sidebar {
+  display: none;
+}
+
+@media screen and (width >= 767px) {
+  .wrap:has(.tc-right-sidebar) {
+    display: flow-root;
+  }
+
+  .tc-right-sidebar {
+    display: block;
+    width: 25%;
+    box-sizing: border-box;
+    float: right;
+    padding-left: 1.5em;
+
+    // Push the core topic list / discovery area to fill the remaining width.
+    + #list-area {
+      width: calc(75% - 1em);
+      float: left;
+    }
+  }
+}
+
+// ── Sidebar block wrapper ─────────────────────────────────────────────────────
+
+.rs-component {
+  margin-bottom: 1.5em;
+
+  h3 {
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ctt-text-muted);
+    border-bottom: 1px solid var(--ctt-border);
+    padding-bottom: 0.5em;
+    margin-bottom: 0.75em;
+  }
+}
+
+// ── Category list ─────────────────────────────────────────────────────────────
+
+.category-list__heading {
+  font-family: 'PT Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ctt-text-muted);
+  border-bottom: 1px solid var(--ctt-border);
+  padding-bottom: 0.5em;
+  margin-bottom: 0.75em;
+}
+
+.category-list__category {
+  &:not(:last-child) {
+    margin-bottom: 0.4em;
+  }
+
+  a {
+    color: var(--ctt-text);
+    font-size: 14px;
+
+    &:hover {
+      color: var(--ctt-accent);
+      text-decoration: none;
+    }
+  }
 }
 
 // ── Topic list desktop card layout ───────────────────────────────────────────
