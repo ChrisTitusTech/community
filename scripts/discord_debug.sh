@@ -153,15 +153,22 @@ fi
 # ── 4. Python environment ─────────────────────────────────────────────────────
 hdr "4. Python environment"
 
-PYTHON_BIN=$(command -v python3 2>/dev/null || true)
-if [[ -n "$PYTHON_BIN" ]]; then
-  PY_VER=$("$PYTHON_BIN" --version 2>&1)
-  pass "python3 found: $PY_VER ($PYTHON_BIN)"
+# Prefer the venv python (used by the service) over the system python
+VENV_PYTHON="$BOT_DIR/venv/bin/python3"
+if [[ -x "$VENV_PYTHON" ]]; then
+  PYTHON_BIN="$VENV_PYTHON"
+  info "Using venv python: $VENV_PYTHON"
+elif command -v python3 &>/dev/null; then
+  PYTHON_BIN=$(command -v python3)
+  warn "venv not found at $VENV_PYTHON — falling back to system python3 ($PYTHON_BIN). Run: python3 -m venv $BOT_DIR/venv && $BOT_DIR/venv/bin/pip install -r $REQ_TXT"
 else
-  fail "python3 not found in PATH — install with: apt install python3"
+  PYTHON_BIN=""
+  fail "python3 not found — install with: apt install python3"
 fi
 
 if [[ -n "$PYTHON_BIN" ]]; then
+  PY_VER=$("$PYTHON_BIN" --version 2>&1)
+  pass "python3 found: $PY_VER ($PYTHON_BIN)"
   for pkg in discord aiohttp dotenv; do
     if "$PYTHON_BIN" -c "import $pkg" 2>/dev/null; then
       VER=$("$PYTHON_BIN" -c "import importlib.metadata; print(importlib.metadata.version('$(
@@ -169,7 +176,7 @@ if [[ -n "$PYTHON_BIN" ]]; then
       )')") 2>/dev/null || true
       pass "Python package '${pkg}' importable${VER:+ (v${VER})}"
     else
-      fail "Python package '${pkg}' not installed — run: pip install -r $REQ_TXT"
+      fail "Python package '${pkg}' not installed — run: $BOT_DIR/venv/bin/pip install -r $REQ_TXT"
     fi
   done
 fi
@@ -227,11 +234,12 @@ fi
 hdr "8. Discourse container"
 
 if command -v docker &>/dev/null; then
-  DISC_CONTAINER=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -i discourse | head -1 || true)
+  # Standard Discourse Docker container is named 'app'; also catch any with 'discourse' in the name
+  DISC_CONTAINER=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -E '^app$|discourse' | head -1 || true)
   if [[ -n "$DISC_CONTAINER" ]]; then
     pass "Discourse Docker container running: $DISC_CONTAINER"
   else
-    warn "No running Docker container with 'discourse' in the name found — is Discourse using a different container runtime?"
+    warn "No running Docker container named 'app' or 'discourse' found — check: docker ps"
   fi
 elif [[ -f /etc/systemd/system/discourse.service ]] || systemctl is-active --quiet discourse 2>/dev/null; then
   pass "Discourse systemd service is active"
