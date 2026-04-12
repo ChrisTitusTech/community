@@ -238,15 +238,27 @@ body,
     border-color: var(--ctt-border);
   }
 
-  // Base row — explicit background prevents transparent fallback contrast failures
+  // Base row — explicit background + color on every child element prevents
+  // Discourse's --primary variable (which can be near-invisible in dark mode)
+  // from leaking into row text through inheritance.
   .select-kit-row {
     background: var(--ctt-card-bg);
     color: var(--ctt-text);
 
+    // Target every text-bearing child Discourse renders inside a row
     .name,
     .desc,
-    .badge-category__name {
+    .texts,
+    .item,
+    span,
+    .badge-category__name,
+    .badge-category__label {
       color: var(--ctt-text);
+    }
+
+    // Keep icons visible but slightly muted
+    .d-icon {
+      color: var(--ctt-text-muted);
     }
 
     &:hover,
@@ -256,7 +268,15 @@ body,
 
       .name,
       .desc,
-      .badge-category__name {
+      .texts,
+      .item,
+      span,
+      .badge-category__name,
+      .badge-category__label {
+        color: var(--ctt-text);
+      }
+
+      .d-icon {
         color: var(--ctt-text);
       }
     }
@@ -267,7 +287,12 @@ body,
 
       .name,
       .desc,
-      .badge-category__name {
+      .texts,
+      .item,
+      span,
+      .badge-category__name,
+      .badge-category__label,
+      .d-icon {
         color: var(--ctt-accent-text);
       }
     }
