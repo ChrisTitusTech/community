@@ -296,6 +296,26 @@ body,
         color: var(--ctt-accent-text);
       }
     }
+
+    // Combined state: selected AND highlighted/hovered at the same time.
+    // Needs higher specificity (two classes) so it beats both single-class
+    // rules above, regardless of which external stylesheet loads last.
+    &.is-selected.is-highlighted,
+    &.is-selected:hover {
+      background: var(--ctt-accent) !important;
+      color: var(--ctt-accent-text) !important;
+
+      .name,
+      .desc,
+      .texts,
+      .item,
+      span,
+      .badge-category__name,
+      .badge-category__label,
+      .d-icon {
+        color: var(--ctt-accent-text) !important;
+      }
+    }
   }
 }
 
