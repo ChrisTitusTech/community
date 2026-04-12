@@ -4,26 +4,32 @@
 ## Template reference: https://github.com/discourse/discourse_docker/blob/main/samples/standalone.yml
 ##
 ## ── Secrets management ───────────────────────────────────────────────────────
-## This file is committed to git.  Secrets are passed via shell environment
-## variables — the launcher substitutes $VAR references at build time.
+## This file is a TEMPLATE committed to a public git repo.
+## The $VAR placeholders below are NOT expanded by the Discourse launcher —
+## it reads YAML directly and does not perform shell substitution.
 ##
-## Store secrets in /etc/discourse.env on the server (chmod 600, owned root):
+## To deploy, use envsubst to produce the real config on the server:
 ##
-##   DISCOURSE_HOSTNAME=forum.christitus.com
-##   DISCOURSE_DEVELOPER_EMAILS=contact@christitus.com
-##   DISCOURSE_SMTP_ADDRESS=email-smtp.us-east-1.amazonaws.com
-##   DISCOURSE_SMTP_PORT=2587
-##   DISCOURSE_SMTP_USER_NAME=AKIAxxxxxxxxxxxxxxxxx
-##   DISCOURSE_SMTP_PASSWORD=your+ses+smtp+password
-##   DISCOURSE_SMTP_DOMAIN=christitus.com
-##   DISCOURSE_NOTIFICATION_EMAIL=noreply@christitus.com
+##   1. Store secrets in /etc/environment on the server (root-owned):
 ##
-## Then rebuild with:
-##   source /etc/discourse.env && cd /var/discourse && ./launcher rebuild app
+##        DISCOURSE_SMTP_ADDRESS=email-smtp.us-east-1.amazonaws.com
+##        DISCOURSE_SMTP_PORT=2587
+##        DISCOURSE_SMTP_USER_NAME=AKIAxxxxxxxxxxxxxxxxx
+##        DISCOURSE_SMTP_PASSWORD=your+ses+smtp+password
 ##
-## Bootstrap:  source /etc/discourse.env && ./launcher bootstrap app
+##   2. Generate the real containers/app.yml and rebuild:
+##
+##        source /etc/environment
+##        envsubst < /path/to/this/deploy/app.yml \
+##          > /var/discourse/containers/app.yml
+##        cd /var/discourse && ./launcher rebuild app
+##
+##   The generated /var/discourse/containers/app.yml contains real secrets
+##   and must NEVER be committed to git.
+##
+## Bootstrap:  (same envsubst step above, then) ./launcher bootstrap app
 ## Start:       ./launcher start app
-## Rebuild:     source /etc/discourse.env && ./launcher rebuild app
+## Rebuild:     source /etc/environment && envsubst ... && ./launcher rebuild app
 
 templates:
   - "templates/postgres.template.yml"
