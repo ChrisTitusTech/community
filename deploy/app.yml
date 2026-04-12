@@ -53,8 +53,7 @@ env:
   DISCOURSE_DEFAULT_LOCALE: en
 
   ## ── Domain ────────────────────────────────────────────────────────────────
-  ## Set DISCOURSE_HOSTNAME in /etc/discourse.env on the server.
-  DISCOURSE_HOSTNAME: $DISCOURSE_HOSTNAME
+  DISCOURSE_HOSTNAME: forum.christitus.com
 
   ## Force Discourse to generate https:// URLs in OAuth callbacks.
   ## Without this, OAuth providers see http:// redirect URIs and reject them
@@ -63,7 +62,7 @@ env:
 
   ## Email address that receives admin-level notifications (space-separated)
   ## Set DISCOURSE_DEVELOPER_EMAILS in /etc/discourse.env on the server.
-  DISCOURSE_DEVELOPER_EMAILS: $DISCOURSE_DEVELOPER_EMAILS
+  DISCOURSE_DEVELOPER_EMAILS: contact@christitus.com
 
   ## ── Transactional Email (SMTP) ────────────────────────────────────────────
   ## Required for user signups, password resets, and notifications.
@@ -74,8 +73,8 @@ env:
   DISCOURSE_SMTP_PASSWORD: $DISCOURSE_SMTP_PASSWORD
   DISCOURSE_SMTP_ENABLE_START_TLS: true
   DISCOURSE_SMTP_AUTHENTICATION: login
-  DISCOURSE_SMTP_DOMAIN: $DISCOURSE_SMTP_DOMAIN
-  DISCOURSE_NOTIFICATION_EMAIL: $DISCOURSE_NOTIFICATION_EMAIL
+  DISCOURSE_SMTP_DOMAIN: christitus.com
+  DISCOURSE_NOTIFICATION_EMAIL: noreply@christitus.com
 
   ## ── Performance (tuned for 6 vCPU / 6 GB RAM) ────────────────────────────
   ## Unicorn workers handle HTTP requests; keep at (CPU count - 2) to leave
