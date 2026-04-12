@@ -11,7 +11,7 @@
 #        (registered in plugin.rb inside Discourse::Application.routes.append)
 
 module CommunityIntegrations
-  class DiscordIncomingController < ApplicationController
+  class DiscordIncomingController < ::ApplicationController
     requires_plugin "discourse-community-integrations"
 
     # Discord's bot posts JSON — no browser session/CSRF involved.
