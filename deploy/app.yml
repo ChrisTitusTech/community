@@ -106,7 +106,7 @@ volumes:
 hooks:
   after_code:
     - exec:
-        cd: $home/plugins
+        cd: /var/www/discourse/plugins
         cmd:
           ## ── REQUIRED — do not remove ──────────────────────────────────────
           - git clone https://github.com/discourse/docker_manager.git
