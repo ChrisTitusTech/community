@@ -36,8 +36,10 @@ require_relative "app/lib/community_integrations/github_sponsors_checker"
 require_relative "app/lib/community_integrations/youtube_member_checker"
 
 # ── Load Discord bridge ────────────────────────────────────────────────────────
+# NOTE: Only lib files are require_relative'd here. Controllers live under app/
+# and are auto-loaded by Rails — explicitly requiring them at boot causes a
+# NameError because ApplicationController isn't defined yet at that stage.
 require_relative "app/lib/community_integrations/discord_bridge"
-require_relative "app/controllers/community_integrations/discord_incoming_controller"
 
 # ── Register OAuth providers ───────────────────────────────────────────────────
 auth_provider authenticator: Auth::TwitchAuthenticator.new
