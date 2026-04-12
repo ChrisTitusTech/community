@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
-import { getOwner } from "@ember/owner";
 import { service } from "@ember/service";
+import MinimalGamificationLeaderboard from "discourse/plugins/discourse-gamification/discourse/components/minimal-gamification-leaderboard";
 import CttCategoryList from "../../components/ctt-category-list";
 
 export default class CttRightSidebar extends Component {
@@ -8,22 +8,14 @@ export default class CttRightSidebar extends Component {
   @service site;
   @service siteSettings;
 
-  // Resolve the gamification leaderboard component at render time.
-  // Returns null when discourse-gamification is not installed or leaderboard
-  // ID is 0, so the {{#if}} guard below skips it cleanly.
-  get leaderboardComponent() {
-    if (!this.siteSettings.community_integrations_gamification_leaderboard_id) {
-      return null;
-    }
-    return (
-      getOwner(this).resolveRegistration(
-        "component:minimal-gamification-leaderboard"
-      ) ?? null
-    );
-  }
+  leaderboardComponent = MinimalGamificationLeaderboard;
 
   get leaderboardId() {
     return this.siteSettings.community_integrations_gamification_leaderboard_id;
+  }
+
+  get showLeaderboard() {
+    return this.leaderboardComponent && this.leaderboardId > 0;
   }
 
   get showSidebar() {
@@ -37,7 +29,7 @@ export default class CttRightSidebar extends Component {
   <template>
     {{#if this.showSidebar}}
       <div class="tc-right-sidebar">
-        {{#if this.leaderboardComponent}}
+        {{#if this.showLeaderboard}}
           <div class="rs-component rs-minimal-gamification-leaderboard">
             <this.leaderboardComponent @id={{this.leaderboardId}} />
           </div>
@@ -49,3 +41,5 @@ export default class CttRightSidebar extends Component {
     {{/if}}
   </template>
 }
+
+
