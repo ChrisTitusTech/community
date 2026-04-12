@@ -19,7 +19,7 @@ WorkingDirectory=/var/discourse/community/scripts/discord_bot
 # Load secrets from the .env file — never commit this file to version control.
 EnvironmentFile=/var/discourse/community/scripts/discord_bot/.env
 
-ExecStart=/var/discourse/community/scripts/discord_bot/venv/bin/python3 bot.py
+ExecStart=/usr/bin/python3 bot.py
 
 # Restart the bot if it crashes; wait 5 s between attempts.
 Restart=on-failure
