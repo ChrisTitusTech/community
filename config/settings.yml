@@ -7,6 +7,7 @@ plugins:
   community_integrations_twitch_client_id:
     default: ""
     type: string
+    client: false
 
   community_integrations_twitch_client_secret:
     default: ""
@@ -16,42 +17,44 @@ plugins:
   community_integrations_twitch_broadcaster_id:
     default: ""
     type: string
+    client: false
 
   community_integrations_twitch_subscriber_group:
     default: "Twitch Subscriber"
     type: string
+    client: false
 
   # ── GitHub Sponsors ─────────────────────────────────────────────────────────
   community_integrations_github_sponsors_target_username:
     default: "ChrisTitusTech"
     type: string
+    client: false
 
   community_integrations_github_sponsors_group:
     default: "GitHub Sponsors"
     type: string
+    client: false
 
   # ── YouTube Members ─────────────────────────────────────────────────────────
   community_integrations_youtube_client_id:
     default: ""
     type: string
+    client: false
 
   community_integrations_youtube_client_secret:
     default: ""
     type: string
     secret: true
 
-  community_integrations_youtube_channel_id:
+  community_integrations_youtube_members_csv:
     default: ""
     type: string
-
-  community_integrations_youtube_creator_refresh_token:
-    default: ""
-    type: string
-    secret: true
+    client: false
 
   community_integrations_youtube_member_group:
     default: "YouTube Member"
     type: string
+    client: false
 
   # ── Sync schedule ────────────────────────────────────────────────────────────
   community_integrations_sync_interval_hours:
@@ -59,6 +62,7 @@ plugins:
     type: integer
     min: 1
     max: 24
+    client: false
 
   # ── Right sidebar ────────────────────────────────────────────────────────────
   community_integrations_gamification_leaderboard_id:

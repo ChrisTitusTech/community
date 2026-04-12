@@ -67,8 +67,7 @@ class Jobs::SyncCommunityIntegrations < Jobs::Scheduled
   # ── YouTube Members ───────────────────────────────────────────────────────────
 
   def sync_youtube_members
-    return unless SiteSetting.community_integrations_youtube_channel_id.present?
-    return unless SiteSetting.community_integrations_youtube_creator_refresh_token.present?
+    return unless SiteSetting.community_integrations_youtube_members_csv.present?
 
     user_ids_with_account("youtube").each_slice(BATCH_SIZE) do |batch|
       User.where(id: batch).find_each do |user|

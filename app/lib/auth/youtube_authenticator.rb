@@ -8,17 +8,16 @@
 #   - It appears in a user's preferences under "Connected Accounts" so
 #     they can voluntarily link their YouTube/Google account.
 #
-# Why a separate authenticator instead of the built-in google_oauth2?
-# The membership verification requires the youtube.readonly scope, which is
-# not requested by the standard Discourse Google login flow. This provider
-# uses a dedicated GCP OAuth app configured with that extra scope so the
-# user is only asked for YouTube permissions when they explicitly connect.
+# Only the youtube.readonly scope is requested — this is enough to call
+# channels?part=id&mine=true and retrieve the user's YouTube channel ID.
+# That channel ID is then checked against the admin-maintained member CSV
+# (site setting: community_integrations_youtube_members_csv) to determine
+# group membership.  No restricted scopes are needed.
 #
 # Token storage:
 #   The access token and refresh token are stored in UserAssociatedAccount
 #   under provider_name "youtube".  The YoutubeMemberChecker uses the stored
-#   refresh token to obtain a fresh access token when checking membership,
-#   and the creator refresh token (site setting) to query the member list.
+#   refresh token to obtain a fresh access token when re-checking membership.
 class Auth::YouTubeAuthenticator < Auth::ManagedAuthenticator
   def name
     "youtube"
@@ -56,8 +55,7 @@ class Auth::YouTubeAuthenticator < Auth::ManagedAuthenticator
                           # Force consent prompt to guarantee the refresh token
                           # is returned even if the user has authorised before.
                           opts[:prompt] = "consent"
-                          opts[:scope] =
-                            "email profile https://www.googleapis.com/auth/youtube.readonly"
+                          opts[:scope] = "email profile https://www.googleapis.com/auth/youtube.readonly"
                         }
   end
 

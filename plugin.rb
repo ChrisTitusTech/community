@@ -51,13 +51,6 @@ after_initialize do
       case authenticator.name
       when "github"
         Jobs.enqueue(:check_github_sponsor, user_id: result.user.id)
-      when "google_oauth2"
-        # Standard Google login — no YouTube scope on this token; skip YouTube check.
-        # YouTube membership is checked after the dedicated YouTube connect flow
-        # handled by Auth::YouTubeAuthenticator (provider name: "youtube").
-        nil
-      when "youtube"
-        Jobs.enqueue(:check_youtube_member, user_id: result.user.id)
       when "twitch"
         Jobs.enqueue(:check_twitch_subscriber, user_id: result.user.id)
       end

@@ -21,20 +21,15 @@ en:
     # ── YouTube Members ───────────────────────────────────────────────────────
     community_integrations_youtube_client_id: >
       Google OAuth2 Client ID for the YouTube connect flow.
-      This can be the same OAuth app as your main Google login,
-      provided you have enabled the YouTube Data API v3 in GCP and added
-      the youtube.readonly scope to the consent screen.
+      Only youtube.readonly scope is needed — no restricted scopes required.
+      Enable YouTube Data API v3 in your GCP project.
     community_integrations_youtube_client_secret: "Google OAuth2 Client Secret for the YouTube connect flow"
-    community_integrations_youtube_channel_id: >
-      Your YouTube channel ID (starts with UC…).
-      Find it at https://www.youtube.com/account_advanced while signed in as
-      the channel owner.
-    community_integrations_youtube_creator_refresh_token: >
-      Long-lived refresh token for the channel OWNER's Google account with
-      youtube.channel-memberships.creator scope.
-      Obtain this once with scripts/get_youtube_creator_token.py and paste here.
-      This token is used server-side to query the member list; it is NEVER
-      sent to end users.
+    community_integrations_youtube_members_csv: >
+      Paste the raw CSV exported from YouTube Studio → Earn → Members → Export.
+      The plugin reads each member's channel ID from the "Link to profile" column
+      and cross-references it when users connect their YouTube account.
+      Re-export and update this field periodically (e.g. weekly) to keep
+      group membership accurate.
     community_integrations_youtube_member_group: "Discourse group name for active YouTube channel members"
 
     # ── Right sidebar ────────────────────────────────────────────────────────
