@@ -46,8 +46,10 @@ auth_provider authenticator: Auth::TwitchAuthenticator.new
 auth_provider authenticator: Auth::YouTubeAuthenticator.new
 
 # ── Discord bridge: incoming HTTP route ───────────────────────────────────────
-# Must be outside after_initialize — routes are frozen before that hook runs.
-Discourse::Application.routes.append do
+# Must use prepend (not append): append defers execution until after all of
+# routes.rb is drawn — including Discourse's catch-all — so appended routes
+# are inserted AFTER the catch-all and never match. prepend inserts BEFORE.
+Discourse::Application.routes.prepend do
   post "/community-integrations/discord/incoming" =>
          "community_integrations/discord_incoming#receive"
 end
