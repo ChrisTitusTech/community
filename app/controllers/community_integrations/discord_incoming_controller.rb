@@ -16,6 +16,9 @@ module CommunityIntegrations
     skip_before_action :verify_authenticity_token
     # The bot is not a logged-in Discourse user.
     skip_before_action :check_xhr
+    # Not needed for a machine-to-machine API endpoint.
+    skip_before_action :redirect_to_login_if_required
+    skip_before_action :preload_json
     before_action :ensure_bridge_enabled
     before_action :verify_hmac_signature
 

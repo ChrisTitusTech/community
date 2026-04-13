@@ -45,16 +45,13 @@ require_relative "app/lib/community_integrations/discord_bridge"
 auth_provider authenticator: Auth::TwitchAuthenticator.new
 auth_provider authenticator: Auth::YouTubeAuthenticator.new
 
-# ── Discord bridge: incoming HTTP route ───────────────────────────────────────
-# Must use prepend (not append): append defers execution until after all of
-# routes.rb is drawn — including Discourse's catch-all — so appended routes
-# are inserted AFTER the catch-all and never match. prepend inserts BEFORE.
-Discourse::Application.routes.prepend do
-  post "/community-integrations/discord/incoming" =>
-         "community_integrations/discord_incoming#receive"
-end
-
 after_initialize do
+  # ── Discord bridge: incoming HTTP route ───────────────────────────────────────
+  Discourse::Application.routes.append do
+    post "/community-integrations/discord/incoming" =>
+           "community_integrations/discord_incoming#receive"
+  end
+
   # ── Discord bridge: register custom fields ──────────────────────────────────
   # Chat::Message custom fields (requires chat plugin to be loaded)
   if defined?(Chat::Message)
