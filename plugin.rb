@@ -73,6 +73,7 @@ after_initialize do
   # ── Discord bridge: Discourse Chat → Discord General ────────────────────────
   on(:chat_message_created) do |message, channel, _user, _extra|
     next unless SiteSetting.community_integrations_enabled
+    next if Thread.current[:discord_bridge_incoming]
     next if message.custom_fields["discord_bridge_id"].present?
 
     expected_channel_id = SiteSetting.community_integrations_discourse_chat_channel_id

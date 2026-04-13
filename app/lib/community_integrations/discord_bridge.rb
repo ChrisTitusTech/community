@@ -85,6 +85,11 @@ module DiscordBridge
         "Discord: #{payload[:discord_username]}: #{payload[:content]}"
       end
 
+    # Set a thread-local flag so the :chat_message_created event hook in
+    # plugin.rb can skip this message. The custom_fields guard alone is
+    # insufficient because the event fires inside Chat::CreateMessage.call,
+    # before we have a chance to save the discord_bridge_id custom field.
+    Thread.current[:discord_bridge_incoming] = true
     result =
       Chat::CreateMessage.call(
         guardian: Guardian.new(user),
@@ -108,6 +113,8 @@ module DiscordBridge
     PluginStore.set(PLUGIN_STORE_PREFIX, "chat_discourse_#{msg.id}", payload[:discord_msg_id].to_s)
   rescue => e
     Rails.logger.error("DiscordBridge.incoming_chat_message error: #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+  ensure
+    Thread.current[:discord_bridge_incoming] = nil
   end
 
   # Called when a new Discord Forum channel post arrives (creates a Discourse topic).
