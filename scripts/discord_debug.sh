@@ -324,7 +324,7 @@ if [[ -n "$DISCOURSE_API_KEY" ]]; then
     -H "Api-Key: $DISCOURSE_API_KEY" \
     -H "Api-Username: system" \
     "${DISCOURSE_URL}/admin/site_settings/community_integrations_discourse_chat_channel_id.json" \
-    --max-time 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('value',''))" 2>/dev/null || true)
+    --max-time 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); s=d.get('site_settings'); print((s[0].get('value','') if s else d.get('value','')))" 2>/dev/null || true)
   if [[ -z "$CHAT_CH_ID" || "$CHAT_CH_ID" == "0" ]]; then
     fail "community_integrations_discourse_chat_channel_id is 0 or not set in Discourse — configure it at /admin/site_settings (filter: discord)"
   else
@@ -343,7 +343,7 @@ if [[ -n "$DISCOURSE_API_KEY" ]]; then
     -H "Api-Key: $DISCOURSE_API_KEY" \
     -H "Api-Username: system" \
     "${DISCOURSE_URL}/admin/site_settings/community_integrations_discourse_support_category_id.json" \
-    --max-time 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('value',''))" 2>/dev/null || true)
+    --max-time 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); s=d.get('site_settings'); print((s[0].get('value','') if s else d.get('value','')))" 2>/dev/null || true)
   if [[ -z "$SUP_CAT_ID" || "$SUP_CAT_ID" == "0" ]]; then
     fail "community_integrations_discourse_support_category_id is 0 or not set — configure it at /admin/site_settings (filter: discord)"
   else
@@ -359,7 +359,7 @@ if [[ -n "$DISCOURSE_API_KEY" ]]; then
     -H "Api-Key: $DISCOURSE_API_KEY" \
     -H "Api-Username: system" \
     "${DISCOURSE_URL}/admin/site_settings/community_integrations_discord_bridge_username.json" \
-    --max-time 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('value','discord-bridge'))" 2>/dev/null || echo "discord-bridge")
+    --max-time 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); s=d.get('site_settings'); print((s[0].get('value','discord-bridge') if s else d.get('value','discord-bridge')))" 2>/dev/null || echo "discord-bridge")
 
   USER_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
     -H "Api-Key: $DISCOURSE_API_KEY" \
