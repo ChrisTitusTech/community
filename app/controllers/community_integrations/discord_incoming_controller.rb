@@ -12,8 +12,6 @@
 
 module CommunityIntegrations
   class DiscordIncomingController < ::ApplicationController
-    requires_plugin "discourse-community-integrations"
-
     # Discord's bot posts JSON — no browser session/CSRF involved.
     skip_before_action :verify_authenticity_token
     # The bot is not a logged-in Discourse user.
