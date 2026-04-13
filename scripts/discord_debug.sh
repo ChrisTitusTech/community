@@ -17,9 +17,10 @@
 #   10. HMAC round-trip test (sign a payload the same way the bot does, expect 200)
 #   11. Discourse Chat channel ID configured and non-zero
 #   12. Discourse support category ID configured and non-zero
-#   13. discord-bridge Discourse user existence (via Discourse API)
-#   14. Outbound HTTPS to Discord API reachable
-#   15. Recent bot journal log tail
+#   13. Discourse incoming HMAC secret matches bot .env HMAC_SECRET
+#   14. discord-bridge Discourse user existence (via Discourse API)
+#   15. Outbound HTTPS to Discord API reachable
+#   16. Recent bot journal log tail
 
 set -euo pipefail
 
@@ -171,9 +172,9 @@ if [[ -n "$PYTHON_BIN" ]]; then
   pass "python3 found: $PY_VER ($PYTHON_BIN)"
   for pkg in discord aiohttp dotenv; do
     if "$PYTHON_BIN" -c "import $pkg" 2>/dev/null; then
-      VER=$("$PYTHON_BIN" -c "import importlib.metadata; print(importlib.metadata.version('$(
-        case $pkg in dotenv) echo python-dotenv;; discord) echo discord.py;; *) echo "$pkg";; esac
-      )')") 2>/dev/null || true
+      # Resolve the PyPI package name (importlib.metadata uses the distribution name)
+      case $pkg in dotenv) META_PKG="python-dotenv";; discord) META_PKG="discord.py";; *) META_PKG="$pkg";; esac
+      VER=$("$PYTHON_BIN" -c "import importlib.metadata; print(importlib.metadata.version('${META_PKG}'))" 2>/dev/null || true)
       pass "Python package '${pkg}' importable${VER:+ (v${VER})}"
     else
       fail "Python package '${pkg}' not installed — run: $BOT_DIR/venv/bin/pip install -r $REQ_TXT"
@@ -251,7 +252,7 @@ fi
 hdr "9. Discourse incoming endpoint (wrong signature → expect 401)"
 
 ENDPOINT="${DISCOURSE_URL}/community-integrations/discord/incoming"
-HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
   -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "X-Bridge-Signature: sha256=invalidsignature" \
@@ -289,7 +290,7 @@ print('sha256=' + hmac.new(secret, body, hashlib.sha256).hexdigest())
     if [[ -z "$CORRECT_SIG" ]]; then
       warn "Could not compute HMAC signature — skipping round-trip test"
     else
-      RT_CODE=$(curl -sf -o /tmp/discord_debug_response.txt -w "%{http_code}" \
+      RT_CODE=$(curl -s -o /tmp/discord_debug_response.txt -w "%{http_code}" \
         -X POST "$ENDPOINT" \
         -H "Content-Type: application/json" \
         -H "X-Bridge-Signature: $CORRECT_SIG" \
@@ -331,7 +332,7 @@ if [[ -n "$DISCOURSE_API_KEY" ]]; then
     pass "community_integrations_discourse_chat_channel_id = $CHAT_CH_ID"
   fi
 else
-  warn "DISCOURSE_API_KEY not set — skipping Discourse site settings checks (checks 11-13)"
+  warn "DISCOURSE_API_KEY not set — skipping Discourse site settings checks (checks 11-14)"
   info "To enable: DISCOURSE_API_KEY=<your-admin-api-key> bash $0"
 fi
 
@@ -351,8 +352,39 @@ if [[ -n "$DISCOURSE_API_KEY" ]]; then
   fi
 fi
 
-# ── 13. discord-bridge Discourse user ────────────────────────────────────────
-hdr "13. 'discord-bridge' fallback user"
+# ── 13. Discourse incoming HMAC secret configured ────────────────────────────
+hdr "13. Discourse incoming HMAC secret (must match bot .env HMAC_SECRET)"
+
+if [[ -n "$DISCOURSE_API_KEY" ]]; then
+  INCOMING_SECRET_LEN=$(curl -sf \
+    -H "Api-Key: $DISCOURSE_API_KEY" \
+    -H "Api-Username: system" \
+    "${DISCOURSE_URL}/admin/site_settings/community_integrations_discord_incoming_secret.json" \
+    --max-time 10 2>/dev/null | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+s=d.get('site_settings')
+v=(s[0].get('value','') if s else d.get('value',''))
+print(len(v))
+" 2>/dev/null || echo "0")
+
+  if [[ -z "$INCOMING_SECRET_LEN" || "$INCOMING_SECRET_LEN" == "0" ]]; then
+    fail "community_integrations_discord_incoming_secret is not set in Discourse — copy HMAC_SECRET from .env and set it at /admin/site_settings (filter: incoming_secret)"
+  else
+    # Optionally compare to the .env secret length as a basic sanity check
+    ENV_HMAC_LEN="${#ENV_VARS[HMAC_SECRET]:-0}"
+    if [[ -f "$ENV_FILE" && "${ENV_VARS[HMAC_SECRET]+set}" == "set" && "$INCOMING_SECRET_LEN" != "$ENV_HMAC_LEN" ]]; then
+      warn "community_integrations_discord_incoming_secret is set (${INCOMING_SECRET_LEN} chars) but length differs from .env HMAC_SECRET (${ENV_HMAC_LEN} chars) — they MUST be identical"
+    else
+      pass "community_integrations_discord_incoming_secret is set in Discourse (${INCOMING_SECRET_LEN} chars)"
+    fi
+  fi
+else
+  warn "DISCOURSE_API_KEY not set — skipping HMAC secret check"
+fi
+
+# ── 14. discord-bridge Discourse user ────────────────────────────────────────
+hdr "14. 'discord-bridge' fallback user"
 
 if [[ -n "$DISCOURSE_API_KEY" ]]; then
   BRIDGE_USER_SETTING=$(curl -sf \
@@ -376,8 +408,8 @@ if [[ -n "$DISCOURSE_API_KEY" ]]; then
   fi
 fi
 
-# ── 14. Outbound HTTPS to Discord API ────────────────────────────────────────
-hdr "14. Outbound connectivity to Discord API"
+# ── 15. Outbound HTTPS to Discord API ────────────────────────────────────────
+hdr "15. Outbound connectivity to Discord API"
 
 DISCORD_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
   "https://discord.com/api/v10/gateway" \
@@ -399,8 +431,8 @@ if [[ -f "$ENV_FILE" ]]; then
   # We just care the domain is up; we already know the webhook URL in the file is valid
 fi
 
-# ── 15. Recent bot logs ───────────────────────────────────────────────────────
-hdr "15. Recent bot journal logs (last 30 lines)"
+# ── 16. Recent bot logs ─────────────────────────────────────────────────────
+hdr "16. Recent bot journal logs (last 30 lines)"
 
 if systemctl list-unit-files "${SERVICE_NAME}.service" &>/dev/null && \
    systemctl list-unit-files "${SERVICE_NAME}.service" | grep -q "${SERVICE_NAME}"; then
