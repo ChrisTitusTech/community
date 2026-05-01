@@ -28,7 +28,7 @@
   --ctt-accent:        #47c4f1;
   // Text on accent-colored backgrounds (e.g. active buttons, badges)
   // #212529 on #47c4f1 = 6.3:1 (AA ✓)
-  --ctt-accent-text:   #212529;
+  --ctt-accent-text:   #212529!important;
   // Slightly darker shade used for button :hover/:focus states
   --ctt-accent-hover:  #2fb8ef;
   // Translucent accent used for hover/active tinted backgrounds
@@ -52,25 +52,22 @@
 // Light mode — activated when the OS/browser prefers a light colour scheme.
 @media (prefers-color-scheme: light) {
   :root {
-    // #0a7ea4 on #ffffff = 4.62:1 (AA ✓)
-    --ctt-accent:        #0a7ea4;
-    // #ffffff on #0a7ea4 = 4.54:1 (AA ✓)
-    --ctt-accent-text:   #ffffff;
-    // #085f7a on #ffffff = 7.16:1 (AA ✓) — darker hover teal
-    --ctt-accent-hover:  #085f7a;
-    --ctt-accent-tint:   rgba(10, 126, 164, 0.08);
-    --ctt-page-bg:       #f8f9fa;
-    --ctt-card-bg:       #ffffff;
-    --ctt-input-bg:      #e9ecef;
-    --ctt-border:        #dee2e6;
-    // #212529 on #ffffff = 16:1 (AAA ✓)
-    --ctt-text:          #212529;
-    --ctt-text-dark:     #000000;
-    // #495057 on #ffffff = 8.17:1, on #e9ecef = 6.89:1 (AA ✓)
-    --ctt-text-muted:    #495057;
-    --ctt-shadow:        rgba(0, 0, 0, 0.08) 0 0.125em 0.5em,
-                         rgba(0, 0, 0, 0.06) 0 0 0 1px inset;
-    --ctt-focus-ring:    0 0 0 3px rgba(10, 126, 164, 0.45);
+    // Softer accent to reduce visual intensity in light mode
+    --ctt-accent:        #1b7fa3;
+    // Dark text on accent keeps buttons readable without glowing white text
+    --ctt-accent-text:   #111827!important;
+    --ctt-accent-hover:  #176a88;
+    --ctt-accent-tint:   rgba(27, 127, 163, 0.09);
+    --ctt-page-bg:       #eef1f4;
+    --ctt-card-bg:       #f8fafc;
+    --ctt-input-bg:      #f2f5f8;
+    --ctt-border:        #d4dbe3;
+    --ctt-text:          #1f2937;
+    --ctt-text-dark:     #0f172a;
+    --ctt-text-muted:    #5b6775;
+    --ctt-shadow:        rgba(15, 23, 42, 0.08) 0 0.125em 0.5em,
+                         rgba(15, 23, 42, 0.05) 0 0 0 1px inset;
+    --ctt-focus-ring:    0 0 0 3px rgba(27, 127, 163, 0.3);
   }
 }
 
@@ -194,6 +191,33 @@ body,
 }
 
 // ── Header nav links (single-bar layout) ────────────────────────────────────
+
+.ctt-header-inline {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.ctt-header-inline__logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-right: 0.75rem;
+
+  img {
+    display: block;
+    max-height: 32px;
+    width: auto;
+  }
+
+  span {
+    color: var(--ctt-text-dark);
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+}
 
 .ctt-header-nav {
   display: flex;

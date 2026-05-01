@@ -20,6 +20,14 @@
 
 // ── Header nav on mobile ─────────────────────────────────────────────────────
 
+.ctt-header-inline__logo {
+  margin-right: 0.45rem;
+
+  img {
+    max-height: 26px;
+  }
+}
+
 .ctt-header-nav {
   justify-content: center;
   flex: 1 1 auto;
