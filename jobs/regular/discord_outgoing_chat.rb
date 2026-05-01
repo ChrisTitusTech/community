@@ -21,6 +21,7 @@ module Jobs
       # (loop prevention — the custom field check in the event hook is the
       # primary guard, but we re-check here in case of a race condition).
       return if message.custom_fields["discord_bridge_id"].present?
+      return if DiscordBridge.discord_message_id_for_chat_message(message.id).present?
 
       username   = message.user&.username || "discourse"
       channel_id = SiteSetting.community_integrations_discourse_chat_channel_id

@@ -120,6 +120,8 @@ module DiscordBridge
   # Called when a new Discord Forum channel post arrives (creates a Discourse topic).
   # payload keys: discord_thread_id, discord_username, discord_user_id, title, content
   def self.incoming_forum_post(payload)
+    Thread.current[:discord_bridge_incoming] = true
+
     user, matched = resolve_user(payload[:discord_username], payload[:discord_user_id])
     return unless user
 
@@ -166,11 +168,15 @@ module DiscordBridge
     PluginStore.set(PLUGIN_STORE_PREFIX, "topic_discord_#{topic.id}", payload[:discord_thread_id].to_s)
   rescue => e
     Rails.logger.error("DiscordBridge.incoming_forum_post error: #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+  ensure
+    Thread.current[:discord_bridge_incoming] = nil
   end
 
   # Called when a reply arrives in a Discord Forum thread.
   # payload keys: discord_thread_id, discord_msg_id, discord_username, discord_user_id, content
   def self.incoming_forum_reply(payload)
+    Thread.current[:discord_bridge_incoming] = true
+
     user, matched = resolve_user(payload[:discord_username], payload[:discord_user_id])
     return unless user
 
@@ -214,8 +220,14 @@ module DiscordBridge
 
     post.custom_fields["discord_bridge_id"] = payload[:discord_msg_id].to_s
     post.save_custom_fields
+
+    # Bidirectional mapping: discord msg_id ↔ discourse post id
+    PluginStore.set(PLUGIN_STORE_PREFIX, "post_discord_#{payload[:discord_msg_id]}", post.id)
+    PluginStore.set(PLUGIN_STORE_PREFIX, "post_discourse_#{post.id}", payload[:discord_msg_id].to_s)
   rescue => e
     Rails.logger.error("DiscordBridge.incoming_forum_reply error: #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+  ensure
+    Thread.current[:discord_bridge_incoming] = nil
   end
 
   # ── Outgoing: Discourse → Discord ───────────────────────────────────────────
@@ -291,6 +303,14 @@ module DiscordBridge
 
   def self.discord_thread_id_for_topic(topic_id)
     PluginStore.get(PLUGIN_STORE_PREFIX, "topic_discord_#{topic_id}")
+  end
+
+  def self.discord_message_id_for_chat_message(message_id)
+    PluginStore.get(PLUGIN_STORE_PREFIX, "chat_discourse_#{message_id}")
+  end
+
+  def self.discord_message_id_for_post(post_id)
+    PluginStore.get(PLUGIN_STORE_PREFIX, "post_discourse_#{post_id}")
   end
 
   # ── Internal HTTP helper ─────────────────────────────────────────────────────

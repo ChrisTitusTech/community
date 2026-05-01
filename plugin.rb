@@ -87,6 +87,7 @@ after_initialize do
   # ── Discord bridge: Discourse Support Topic → Discord Forum thread ───────────
   on(:topic_created) do |topic, _opts, _user|
     next unless SiteSetting.community_integrations_enabled
+    next if Thread.current[:discord_bridge_incoming]
     next if topic.custom_fields["discord_bridge_id"].present?
 
     expected_category_id = SiteSetting.community_integrations_discourse_support_category_id
@@ -101,6 +102,7 @@ after_initialize do
   # ── Discord bridge: Discourse Support Reply → Discord Forum thread reply ─────
   on(:post_created) do |post, _opts, _user|
     next unless SiteSetting.community_integrations_enabled
+    next if Thread.current[:discord_bridge_incoming]
     next if post.custom_fields["discord_bridge_id"].present?
     next if post.is_first_post?
 

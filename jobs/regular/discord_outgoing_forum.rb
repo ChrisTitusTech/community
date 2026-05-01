@@ -26,6 +26,8 @@ module Jobs
       # Loop-prevention: skip posts that originated from Discord
       return if post.custom_fields["discord_bridge_id"].present?
       return if topic.custom_fields["discord_bridge_id"].present? && is_new_thread
+      return if is_new_thread && DiscordBridge.discord_thread_id_for_topic(topic.id).present?
+      return if !is_new_thread && DiscordBridge.discord_message_id_for_post(post.id).present?
 
       username = post.user&.username || "discourse"
       content  = post.raw.to_s.strip
