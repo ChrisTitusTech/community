@@ -243,8 +243,8 @@ module DiscordBridge
 
     link    = "#{Discourse.base_url}/chat/c/-/#{chat_channel_id}?messageId=#{message_id}"
     discord_content = "#{content}\n-# [View on forum](<#{link}>)"
-
-    body = { username: "Forum: #{username}", content: discord_content }.to_json
+  
+    body = { username: "Forum: #{username}", content: discord_content, avatar_url: "https://forum.christitus.com/user_avatar/forum.christitus.com/#{username}/144/8_2.png" }.to_json
     post_json(webhook_url, body, auth_header: nil)
   rescue => e
     Rails.logger.error("DiscordBridge.post_to_discord_general error: #{e.class}: #{e.message}")
