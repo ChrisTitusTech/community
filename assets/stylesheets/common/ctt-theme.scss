@@ -531,23 +531,6 @@ body,
     &.warning { border-top: 3px solid #E06F6C; }
   }
 
-  // Unordered list style — gradient bullet from christitus.com
-  ul li {
-    list-style: none;
-    padding-left: 1.25em;
-    position: relative;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0.55em;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: linear-gradient(45deg, #9AC4F8, #7e7e7e);
-    }
-  }
 }
 
 // ── Highlight bar (reading progress) ─────────────────────────────────────────
@@ -908,6 +891,61 @@ footer,
     }
   }
 }
+// ── Polls ─────────────────────────────────────────────────────────────────────
+// Discourse renders polls as: div.poll-outer > div.poll
+// Bar colours are controlled by CSS variables that Discourse defines in :root.
+// We override those variables plus a handful of structural colours that would
+// otherwise fall back to light-theme Discourse values.
+
+div.poll-outer {
+  // Override Discourse's poll bar CSS variables
+  --poll-bar-background:    var(--ctt-input-bg);
+  --poll-bar-color:         var(--ctt-text-muted);
+  --poll-bar-color--chosen: var(--ctt-accent);
+
+  div.poll {
+    background: var(--ctt-card-bg);
+    border-color: var(--ctt-border);
+    border-radius: var(--ctt-radius);
+
+    // Option text colour (Discourse uses var(--primary) which can be invisible)
+    li[data-poll-option-id] {
+      color: var(--ctt-text);
+    }
+
+    // Percentage / absolute vote count floated right in results view
+    .results .percentage,
+    .results .absolute {
+      color: var(--ctt-text-muted);
+    }
+
+    // Border separating poll body from info panel and buttons
+    .poll-info {
+      border-color: var(--ctt-border);
+      color: var(--ctt-text-muted);
+
+      // Large voter count number (e.g. "19")
+      .info-number {
+        color: var(--ctt-text-dark);
+      }
+
+      // "voters" label
+      .info-label {
+        color: var(--ctt-text-muted);
+      }
+    }
+
+    .poll-buttons {
+      border-color: var(--ctt-border);
+    }
+
+    .poll-title {
+      border-color: var(--ctt-border);
+      color: var(--ctt-text-dark);
+    }
+  }
+}
+
 // ── Reduced motion (WCAG 2.3.3 / prefers-reduced-motion) ──────────────────────
 // Disables all CSS transitions and animations for users who have requested
 // reduced motion at the OS level.
